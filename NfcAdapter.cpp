@@ -10,7 +10,7 @@ NfcAdapter::~NfcAdapter(void)
     delete shield;
 }
 
-void NfcAdapter::begin(boolean verbose)
+bool NfcAdapter::begin(boolean verbose, boolean halt_on_not_found=true)
 {
     shield->begin();
 
@@ -21,7 +21,11 @@ void NfcAdapter::begin(boolean verbose)
 #ifdef NDEF_USE_SERIAL
         Serial.print(F("Didn't find PN53x board"));
 #endif
-        while (1); // halt
+        if (halt_on_not_found) {
+          while (1); // halt
+        } else {
+          return false;
+        }
     }
 
     if (verbose)
@@ -34,6 +38,7 @@ void NfcAdapter::begin(boolean verbose)
     }
     // configure board to read RFID tags
     shield->SAMConfig();
+    return true;
 }
 
 boolean NfcAdapter::tagPresent(unsigned long timeout)
